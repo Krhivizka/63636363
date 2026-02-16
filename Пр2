@@ -1,0 +1,53 @@
+using System;
+
+// Класс счета
+public class BankAccount
+{
+    public decimal balance; // баланс
+
+    public void Deposit(decimal amount)
+    {
+        balance += amount;
+        Console.WriteLine($"Положено: {amount}. Баланс: {balance}");
+    }
+
+    public virtual void Withdraw(decimal amount)
+    {
+        if (amount > balance)
+        {
+            Console.WriteLine("Недостаточно денег");
+        }
+        else
+        {
+            balance -= amount;
+            Console.WriteLine($"Снято: {amount}. Остаток: {balance}");
+        }
+    }
+}
+
+// Сберегательный счет
+public class SavingsAccount : BankAccount
+{
+    public override void Withdraw(decimal amount)
+    {
+        if (amount > balance)
+        {
+            Console.WriteLine("Недостаточно денег");
+        }
+        else
+        {
+            base.Withdraw(amount);
+        }
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        var myAccount = new SavingsAccount();
+        myAccount.Deposit(100);
+        myAccount.Withdraw(50);
+        myAccount.Withdraw(60); // попытка снять больше, чем есть
+    }
+}
