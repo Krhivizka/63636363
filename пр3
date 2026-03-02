@@ -1,0 +1,50 @@
+using System;
+using Microsoft.Office.Interop.Excel;
+using ExcelRange = Microsoft.Office.Interop.Excel.Range;
+namespace Excel_Console
+{
+    //dont forget -- using Microsoft.Office.Interop.Excel;
+    class Program
+    {
+        static void Main(string[] args)
+        {
+
+            //Create COM Objects.
+            Application excelApp = new Application();
+
+
+            if (excelApp == null)
+            {
+                Console.WriteLine("Excel is not installed!!");
+                return;
+            }
+
+            Workbook excelBook = excelApp.Workbooks.Open(@"C:\Users\24_ИП-191к\Desktop\test.xlsx");
+            _Worksheet excelSheet = excelBook.Sheets[1];
+            ExcelRange excelRange = excelSheet.UsedRange;
+
+
+            int rows = excelRange.Rows.Count;
+            int cols = excelRange.Columns.Count;
+
+            for (int i = 1; i <= rows; i++)
+            {
+                //create new line
+                Console.Write("\r\n");
+                for (int j = 1; j <= cols; j++)
+                {
+
+                    //write the console
+                    if (excelRange.Cells[i, j] != null && excelRange.Cells[i, j].Value2 != null)
+                        Console.Write(excelRange.Cells[i, j].Value2.ToString() + "\t");
+                }
+            }
+            //after reading, relaase the excel project
+            excelApp.Quit();
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApp);
+            Console.ReadLine();
+        }
+    }
+}
+
+
