@@ -1,0 +1,100 @@
+using System;
+
+// Делегат для уведомления об изменении баланса
+public delegate void BalanceChangedHandler(decimal newBalance);
+
+// Структура для хранения информации о счете
+public struct AccountInfo
+{
+    public string OwnerName;    // Имя владельца
+    public string AccountNumber; // Номер счета
+
+    public AccountInfo(string ownerName, string accountNumber)
+    {
+        OwnerName = ownerName;
+        AccountNumber = accountNumber;
+    }
+}
+
+// Класс счета
+public class BankAccount
+{
+    public decimal Balance; // баланс
+    public AccountInfo Info; // информация о счете
+
+    // Событие для уведомления об изменении баланса
+    public event BalanceChangedHandler OnBalanceChanged;
+
+    public BankAccount(string ownerName, string accountNumber)
+    {
+        Info = new AccountInfo(ownerName, accountNumber);
+        Balance = 0;
+    }
+
+    public void Deposit(decimal amount)
+    {
+        Balance += amount;
+        Console.WriteLine($"Положено: {amount}. Баланс: {Balance}");
+        OnBalanceChanged?.Invoke(Balance); // вызов события
+    }
+
+    public virtual void Withdraw(decimal amount)
+    {
+        if (amount > Balance)
+        {
+            Console.WriteLine("Недостаточно денег");
+        }
+        else
+        {
+            Balance -= amount;
+            Console.WriteLine($"Снято: {amount}. Остаток: {Balance}");
+            OnBalanceChanged?.Invoke(Balance); // вызов события
+        }
+    }
+}
+
+// Сберегательный счет
+public class SavingsAccount : BankAccount
+{
+    public SavingsAccount(string ownerName, string accountNumber)
+        : base(ownerName, accountNumber)
+    {
+    }
+
+    public override void Withdraw(decimal amount)
+    {
+        if (amount > Balance)
+        {
+            Console.WriteLine("Недостаточно денег");
+        }
+        else
+        {
+            base.Withdraw(amount);
+        }
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        var myAccount = new SavingsAccount("Иван Иванов", "123456789");
+        
+        // Подписываемся на событие изменения баланса
+        myAccount.OnBalanceChanged += BalanceChangedHandler;
+
+        myAccount.Deposit(100);
+        myAccount.Withdraw(50);
+        myAccount.Withdraw(60); // попытка снять больше, чем есть
+
+        // Выводим информацию о счете
+        Console.WriteLine($"Владелец: {myAccount.Info.OwnerName}");
+        Console.WriteLine($"Номер счета: {myAccount.Info.AccountNumber}");
+    }
+
+    // Метод обработчика события
+    static void BalanceChangedHandler(decimal newBalance)
+    {
+        Console.WriteLine($"Баланс изменился: {newBalance}");
+    }
+}
