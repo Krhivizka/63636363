@@ -1,0 +1,130 @@
+using System;
+using System.Windows.Forms;
+
+namespace PhysicsSolver
+{
+    public partial class MainForm : Form
+    {
+        public MainForm()
+        {
+            InitializeComponent();
+            CreateUI();
+        }
+
+        private void CreateUI()
+        {
+            this.Text = "Решение физических задач";
+            this.Width = 500;
+            this.Height = 400;
+
+            // Создаем combobox для выбора задачи
+            ComboBox taskSelector = new ComboBox() { Left = 20, Top = 20, Width = 300 };
+            taskSelector.Items.AddRange(new string[]
+            {
+                "Задача 1: Объем цилиндра",
+                "Задача 2: Давление жидкости на кубик"
+            });
+            taskSelector.SelectedIndex = 0;
+            this.Controls.Add(taskSelector);
+
+            // Панель для динамического отображения входных данных
+            Panel inputPanel = new Panel() { Left = 20, Top = 60, Width = 440, Height = 200 };
+            this.Controls.Add(inputPanel);
+
+            // Кнопка для решения
+            Button solveButton = new Button() { Text = "Решить", Left = 20, Top = 270, Width = 100 };
+            this.Controls.Add(solveButton);
+
+            // Текстовое поле для вывода результата
+            TextBox resultBox = new TextBox() { Left = 20, Top = 310, Width = 440, Height = 50, Multiline = true, ReadOnly = true };
+            this.Controls.Add(resultBox);
+
+            // Обработчик смены задачи
+            taskSelector.SelectedIndexChanged += (s, e) =>
+            {
+                inputPanel.Controls.Clear();
+                if (taskSelector.SelectedIndex == 0)
+                {
+                    // Задача 1: Ввод данных для объема цилиндра
+                    inputPanel.Controls.Add(new Label() { Text = "Длина цилиндра (см):",  Left = 0,  Top = 0 });
+                    TextBox lengthBox = new TextBox() { Left = 150,  Top = 0,  Width = 100,  Name = "LengthBox" };
+                    inputPanel. Controls. Add(lengthBox);
+
+                    inputPanel. Controls.Add(new Label() { Text = "Диаметр цилиндра (см):",  Left = 0, Top = 40 });
+                    TextBox diameterBox = new TextBox() { Left = 150, Top = 40, Width = 100, Name = "DiameterBox" };
+                    inputPanel.Controls.Add(diameterBox);
+                }
+                else
+                {
+                    // Задача 2: Ввод данных для давления
+                    inputPanel.Controls.Add(new Label() { Text = "Длина ребра кубика (м):", Left = 0, Top = 0 });
+                    TextBox aBox = new TextBox() { Left = 180, Top = 0, Width = 100, Name = "ABox" };
+                    inputPanel.Controls.Add(aBox);
+
+                    inputPanel.Controls.Add(new Label() { Text = "Плотность кубика ρк (кг/м³):", Left = 0, Top = 40 });
+                    TextBox rhoKBox = new TextBox() { Left = 180, Top = 40, Width = 100, Name = "RhoKBox" };
+                    inputPanel.Controls.Add(rhoKBox);
+
+                    inputPanel.Controls.Add(new Label() { Text = "Плотность жидкости ρж (кг/м³):", Left = 0, Top = 80 });
+                    TextBox rhoJBox = new TextBox() { Left = 180, Top = 80, Width = 100, Text = "998", Name = "RhoJBox" };
+                    inputPanel.Controls.Add(rhoJBox);
+
+                    inputPanel.Controls.Add(new Label() { Text = "Высота h₁ (м):", Left = 0, Top = 120 });
+                    TextBox h1Box = new TextBox() { Left = 180, Top = 120, Width = 100, Text = "0.1", Name = "H1Box" };
+                    inputPanel.Controls.Add(h1Box);
+                }
+            };
+
+            // Обработка нажатия кнопки "Решить"
+            solveButton.Click += (s, e) =>
+            {
+                int taskIndex = taskSelector.SelectedIndex;
+                try
+                {
+                    if (taskIndex == 0)
+                    {
+                        // Задача 1: объем цилиндра
+                        var lengthText = ((TextBox)inputPanel.Controls["LengthBox"])?.Text;
+                        var diameterText = ((TextBox)inputPanel.Controls["DiameterBox"])?.Text;
+
+                        double lengthCm = double.Parse(lengthText);
+                        double diameterCm = double.Parse(diameterText);
+
+                        double radiusCm = diameterCm / 2;
+
+                        // Вычисление объема в кубических сантиметрах
+                        double volume = Math.PI * radiusCm * radiusCm * lengthCm;
+
+                        resultBox.Text = $"Объем цилиндра: {volume:F2} куб. см";
+                    }
+                    else
+                    {
+                        // Задача 2: давление
+                        var aText = ((TextBox)inputPanel.Controls["ABox"])?.Text;
+                        var rhoKText = ((TextBox)inputPanel.Controls["RhoKBox"])?.Text;
+                        var rhoJText = ((TextBox)inputPanel.Controls["RhoJBox"])?.Text;
+                        var h1Text = ((TextBox)inputPanel.Controls["H1Box"])?.Text;
+
+                        double a = double.Parse(aText);
+                        double rhoK = double.Parse(rhoKText);
+                        double rhoJ = double.Parse(rhoJText);
+                        double h1 = double.Parse(h1Text);
+
+                        // Давление: p = ρж * g * h
+                        const double g = 9.81; // ускорение свободного падения
+                        double pressure = rhoJ * g * h1; // в Паскалях
+
+                        resultBox.Text = $"Давление жидкости на верхнюю грань кубика: {pressure:F2} Паскалей";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    resultBox.Text = $"Ошибка ввода: {ex.Message}";
+                }
+            };
+
+            // Инициализация UI для первой задачи по умолчанию
+            taskSelector.SelectedIndex = 0;
+        }
+    }
+}
